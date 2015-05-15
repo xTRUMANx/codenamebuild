@@ -14,7 +14,7 @@ app.use(Express.static(Path.join(__dirname, "public")));
 
 app.use(Morgan("dev"));
 
-app.set("port", process.env.PORT || 3000);
+app.set("port", process.env.PORT || 3002);
 
 app.use(function(req, res){
   ReactRouter.run(UI, req.url, function(Handler){

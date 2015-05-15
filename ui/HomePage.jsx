@@ -1,8 +1,10 @@
 var React = require("react"),
   ProjectCard = require("./ProjectCard"),
-  Store = require("./Store");
+  Store = require("./Store"),
+  MasonryMixin = require('react-masonry-mixin');
 
 var HomePage = React.createClass({
+  mixins: [MasonryMixin('masonryContainer')],
   componentWillMount: function(){
     Store.subscribe(this.resetState);
   },
@@ -40,7 +42,9 @@ var HomePage = React.createClass({
         </ul>
         <h2 className="text-center">Projects</h2>
         <input className="form-control" placeholder="Find a project..." />
-        {projectCards}
+        <div ref="masonryContainer">
+          {projectCards}
+        </div>
       </div>
     );
   }
