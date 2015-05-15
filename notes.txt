@@ -1,0 +1,28 @@
+I would like someone to build a version of https://shootingpeople.org for "projects" instead of films. A project can be anything: album, film, book, etc.
+
+Shooting People connects you with thousands of filmmakers, actors, crew, technologists and industry to get films made and seen.
+Learn what Shooting People can do for you.
+
+Seems to consists of job ads, blog posts, members listing and discussions by members.
+
+Codename: Build
+
+Features:
+- Submit a project
+- Browse submitted projects
+- View a particular project in detail
+- Join a project
+- Discuss and collaborate with others in your project. Kind of like a subreddit or a forum.
+
+Thoughts
+- Sounds like a social network. Different people's images will probably be on every page on the site
+- Needs to be low-friction. No projects, no interest from people. No interest from people, no projects. Will need something to prime the app with activity.
+
+New Visitor's flow
+- Hit's the home page
+- Sees a short blurb on top explaining what this site is all about
+- Then sees a list of projects
+- If they see something of interest, they can decide to lurk and just view what's going on with the project anonymously
+- If they'd like to contribute, either to an existing project or create their own, they have to sign up.
+- Sign up should be dead simple; enter email/password and probably fb and other types of logins.
+- Let people "like" a project onto facebook or tweet it. Project gets visibility, and the site get visibility.
