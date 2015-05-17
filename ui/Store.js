@@ -1,3 +1,7 @@
+var Q = require("q"),
+  Request = require("request"),
+  Config = require("./Config");
+
 var Store = {
   emit: function(){
     this.subscriptions = this.subscriptions || [];
@@ -11,18 +15,18 @@ var Store = {
 
     this.subscriptions.push(cb);
   },
-  setAndGetInitialState: function(){
-    this.projects = [
-      {id: 1, title: "Project 1", description: "First Project", membersCount: 6},
-      {id: 2, title: "Project 2", description: "Second Project", membersCount: 12},
-      {id: 3, title: "Project 3", description: "Third Project", membersCount: 24},
-      {id: 4, title: "Project 4", description: "Fourth Project", membersCount: 20},
-      {id: 5, title: "Project 5", description: "Fifth Project", membersCount: 19}
-    ];
+  setAndGetInitialState: function(projects){
+    this.state = {};
 
-    return {
-      projects: this.projects
-    };
+    if(projects){
+      this.state.projects = projects;
+    }
+    else{
+      this.state.projects = [];
+      this.getProjects();
+    }
+
+    return this.state;
   },
   giveState: function(){
     var stateJSON = JSON.stringify(this.state, function(key, value){
@@ -46,6 +50,52 @@ var Store = {
     console.log(this.state)
 
     this.emit();
+  },
+  saveProject: function(project){
+    var deferred = Q.defer();
+
+    Request({
+      url: Config.apiEndpoints.projects,
+      method: "POST",
+      json: true,
+      body: project
+    }, function(err, res, body){
+      if(err){
+        deferred.reject(err);
+      }
+      else{
+        deferred.resolve(body.id);
+      }
+    });
+
+    return deferred.promise;
+  },
+  getProjects: function(){
+    var deferred = Q.defer();
+
+    this.loadingProjects = true;
+    this.emit();
+
+    Request({
+      url: Config.apiEndpoints.projects,
+      method: "GET",
+      json: true
+    }, function(err, res, body){
+      this.loadingProjects = false;
+
+      if(err){
+        deferred.reject(err);
+      }
+      else{
+        this.state = this.state || {};
+        this.state.projects = body.projects;
+        deferred.resolve(body.projects);
+      }
+
+      this.emit();
+    }.bind(this));
+
+    return deferred.promise;
   }
 };
 

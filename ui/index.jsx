@@ -4,30 +4,54 @@ var React = require("react"),
   Route =  ReactRouter.Route,
   DefaultRoute =  ReactRouter.DefaultRoute,
   HomePage = require("./HomePage"),
-  ProjectPage = require("./ProjectPage");
+  ProjectPage = require("./ProjectPage"),
+  CreateProjectPage = require("./CreateProjectPage"),
+  Q = require("q");
 
 var App = React.createClass({
   render: function(){
-    return (
-      <RouteHandler />
+    return  (
+      <div className="container">
+        <h1 className="text-center">Codename: Build</h1>
+        <p className="lead text-center">Share your idea and bring your vision to life</p>
+        <RouteHandler {...this.props} />
+        <script id="data" type="text" dangerouslySetInnerHTML={{__html: JSON.stringify(this.props.data)}} />
+      </div>
     );
   }
 });
 
 var routes = (
   <Route path="/" handler={App}>
-    <DefaultRoute handler={HomePage} />
-    <Route name="project" handler={ProjectPage} />
+    <DefaultRoute name="home" handler={HomePage} />
+    <Route name="projects">
+      <DefaultRoute handler={ProjectPage} />
+      <Route name="createProject" handler={CreateProjectPage} />
+    </Route>
   </Route>
 );
 
 if(typeof window !== "undefined"){
   window.onload = function(){
-    console.log("running router")
-    ReactRouter.run(routes, ReactRouter.HistoryLocation, function(Handler){
-      React.render(<Handler />, document.getElementById("app-container"));
+    ReactRouter.run(routes, ReactRouter.HistoryLocation, function(Handler, state){
+      // TODO: Let server pass in data to client
+      // instead of having client fetch data onload
+      var data = JSON.parse(document.getElementById("data").innerHTML);
+
+      React.render(<Handler data={data} />, document.getElementById("app-container"));
     });
   }
 }
 
-module.exports = routes;
+function fetchData(routes, params, query, cookie) {
+  return Q.all(routes.reduce(function (promises, route) {
+    promises.push(route.handler.fetchData ? route.handler.fetchData(params, query, cookie) : null);
+
+    return promises;
+  }, []));
+}
+
+module.exports = {
+  routes: routes,
+  fetchData: fetchData
+};

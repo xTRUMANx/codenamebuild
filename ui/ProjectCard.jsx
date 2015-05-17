@@ -8,9 +8,8 @@ var ProjectCard = React.createClass({
 
     return (
       <div className="col-xs-6 col-sm-4 col-lg-3">
-        <Link to="project" query={{id: project.id}}><h4>{project.title}</h4></Link>
+        <Link to="projects" query={{id: project.id}}><h4>{project.name}</h4></Link>
         <p>{project.description}</p>
-        <p>{project.membersCount} {project.membersCount === 1 ? "member" : "members"}</p>
         <hr />
       </div>
     );

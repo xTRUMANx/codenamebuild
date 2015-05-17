@@ -1,10 +1,18 @@
 var React = require("react"),
+  ReactRouter = require("react-router"),
+  Link = ReactRouter.Link,
   ProjectCard = require("./ProjectCard"),
   Store = require("./Store"),
-  MasonryMixin = require('react-masonry-mixin');
+  MasonryMixin = require('react-masonry-mixin'),
+  ProgressBar = require("./ProgressBar");
 
 var HomePage = React.createClass({
-  mixins: [MasonryMixin('masonryContainer')],
+  mixins: [MasonryMixin('masonryContainer', {})],
+  statics: {
+    fetchData: function(){
+      return Store.getProjects();
+    }
+  },
   componentWillMount: function(){
     Store.subscribe(this.resetState);
   },
@@ -12,7 +20,7 @@ var HomePage = React.createClass({
     this.setState(newState);
   },
   getInitialState: function(){
-    return Store.setAndGetInitialState();
+    return Store.setAndGetInitialState(this.props.data.home);
   },
   render: function(){
     projectCards = this.state.projects.map(function(project){
@@ -20,18 +28,16 @@ var HomePage = React.createClass({
     });
 
     var startAProjectCard = (
-      <div key={0} className="col-sm-4">
+      <div key={0} className="col-xs-6 col-sm-4 col-lg-3">
         <p>Couldn't find something of interest?</p>
-        <a className="btn btn-lg btn-primary" href="/projects/create">Start a Project</a>
+        <Link className="btn btn-lg btn-primary" to="createProject">Start a Project</Link>
       </div>
     );
 
     projectCards.push(startAProjectCard);
 
     return (
-      <div className="container">
-        <h1 className="text-center">Codename: Build</h1>
-        <p className="lead text-center">Share your idea and bring your vision to life</p>
+      <div>
         <h2>TODO</h2>
         <ul>
           <li>Submit a project</li>
@@ -43,6 +49,7 @@ var HomePage = React.createClass({
         <h2 className="text-center">Projects</h2>
         <input className="form-control" placeholder="Find a project..." />
         <div ref="masonryContainer">
+          {Store.loadingProjects ? <ProgressBar message="Loading Projects" /> : null}
           {projectCards}
         </div>
       </div>
