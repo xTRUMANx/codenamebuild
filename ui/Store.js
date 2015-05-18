@@ -5,6 +5,7 @@ var Q = require("q"),
 var Store = {
   emit: function(){
     this.subscriptions = this.subscriptions || [];
+
     this.subscriptions.forEach(function(subscription){
       subscription(this.state);
     }.bind(this));
@@ -14,16 +15,13 @@ var Store = {
 
     this.subscriptions.push(cb);
   },
-  setAndGetInitialState: function(projects){
-    this.state = {};
+  unsubscribe: function(cb){
+    var index = this.subscriptions.indexOf(cb);
 
-    if(projects){
-      this.state.projects = projects;
-    }
-    else{
-      this.state.projects = [];
-      this.getProjects();
-    }
+    this.subscriptions.splice(index, 1);
+  },
+  setAndGetInitialState: function(state){
+    this.state = state || this.state || {};
 
     return this.state;
   },
@@ -85,7 +83,8 @@ var Store = {
         this.state = this.state || {};
 
         this.state.projects = body.projects;
-        deferred.resolve(body.projects);
+
+        deferred.resolve(this.state);
       }
 
       this.emit();
@@ -99,6 +98,71 @@ var Store = {
       method: "GET",
       json: true
     }, cb);
+  },
+  signUp: function(username, password){
+    var deferred = Q.defer();
+
+    Request({
+      url: Config.apiEndpoints.signUp,
+      method: "POST",
+      json: true,
+      body: {username: username, password: password}
+    }, function(err, res, body){
+      if(err){
+        deferred.reject(err);
+      }
+      else{
+        deferred.resolve(body.err);
+      }
+    });
+
+    return deferred.promise;
+  },
+  login: function(username, password){
+    var deferred = Q.defer();
+
+    Request({
+      url: Config.apiEndpoints.login,
+      method: "POST",
+      json: true,
+      body: {username: username, password: password}
+    }, function(err, res, body){
+      if(err){
+        deferred.reject(err);
+      }
+      else{
+        deferred.resolve(body.err);
+      }
+    });
+
+    return deferred.promise;
+  },
+  setUsername: function(username){
+    this.state = this.state || {};
+
+    this.state.username = username;
+
+    this.emit();
+  },
+  logout: function(){
+    var deferred = Q.defer();
+
+    Request({
+      url: Config.apiEndpoints.logout
+    }, function(err){
+      if(!err){
+        this.state.username = null;
+
+        this.emit();
+
+        deferred.resolve();
+      }
+      else{
+        deferred.reject(err);
+      }
+    }.bind(this));
+
+    return deferred.promise;
   }
 };
 

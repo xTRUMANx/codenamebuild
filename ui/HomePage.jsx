@@ -28,14 +28,24 @@ var HomePage = React.createClass({
   componentWillMount: function(){
     Store.subscribe(this.resetState);
   },
+  componentWillUnmount: function(){
+    Store.unsubscribe(this.resetState);
+  },
   resetState: function(newState){
     this.setState(newState);
   },
   getInitialState: function(){
-    return Store.setAndGetInitialState(this.props.data.home);
+    if(!this.props.data.home){
+      Store.getProjects();
+
+      return Store.setAndGetInitialState();
+    }
+    else{
+      return Store.setAndGetInitialState({projects: this.props.data.home});
+    }
   },
   render: function(){
-    projectCards = this.state.projects.map(function(project){
+    projectCards = (this.state.projects ? this.state.projects : []).map(function(project){
       return <ProjectCard key={project.id} project={project} />
     });
 
@@ -61,8 +71,7 @@ var HomePage = React.createClass({
         <h2 className="text-center">Projects</h2>
         <input className="form-control" placeholder="Find a project..." />
         <div ref="masonryContainer">
-          {Store.loadingProjects ? <ProgressBar message="Loading Projects" /> : null}
-          {projectCards}
+          {Store.loadingProjects ? <ProgressBar message="Loading Projects" /> : projectCards}
         </div>
       </div>
     );

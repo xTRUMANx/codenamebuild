@@ -1,4 +1,5 @@
 var Express = require("express"),
+  session = require("express-session"),
   BodyParser = require("body-parser"),
   Path = require("path"),
   FS = require("fs"),
@@ -18,6 +19,15 @@ app.use(Express.static(Path.join(__dirname, "public")));
 app.use(BodyParser.json());
 
 app.use(Morgan("dev"));
+
+app.use(session({
+  secret: "mysupersecretsessionsecret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+  }
+}));
 
 app.set("port", process.env.PORT || 3002);
 

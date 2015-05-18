@@ -26,3 +26,7 @@ New Visitor's flow
 - If they'd like to contribute, either to an existing project or create their own, they have to sign up.
 - Sign up should be dead simple; enter email/password and probably fb and other types of logins.
 - Let people "like" a project onto facebook or tweet it. Project gets visibility, and the site get visibility.
+
+Issues:
+- Parse backend is slow. Why not handle the data locally and save 300+ ms in network overheard.
+- Masonry mixin is kinda weird, will probably remove it.
