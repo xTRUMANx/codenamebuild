@@ -10,14 +10,19 @@ var parseApiClient = new ParseApi({
 
 router.get("/", function(req, res){
   parseApiClient.findMany("Project", "", function(err, response){
-    var projects = response.results.map(function(result){
-      var project = result;
-      project.id = result.objectId;
-      return project;
-    });
+    if(err){
+      res.status(500).end();
+    }
+    else{
+      var projects = response.results.map(function(result){
+        var project = result;
+        project.id = result.objectId;
+        return project;
+      });
 
-    res.json({projects: response.results});
-  })
+      res.json({projects: response.results});
+    }
+  });
 });
 
 router.post("/", function(req, res){

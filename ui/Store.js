@@ -5,7 +5,6 @@ var Q = require("q"),
 var Store = {
   emit: function(){
     this.subscriptions = this.subscriptions || [];
-
     this.subscriptions.forEach(function(subscription){
       subscription(this.state);
     }.bind(this));
@@ -76,18 +75,15 @@ var Store = {
     this.loadingProjects = true;
     this.emit();
 
-    Request({
-      url: Config.apiEndpoints.projects,
-      method: "GET",
-      json: true
-    }, function(err, res, body){
+    this.fetchProjectData(function(err, res, body){
       this.loadingProjects = false;
 
-      if(err){
+      if(err || !body){
         deferred.reject(err);
       }
       else{
         this.state = this.state || {};
+
         this.state.projects = body.projects;
         deferred.resolve(body.projects);
       }
@@ -96,6 +92,13 @@ var Store = {
     }.bind(this));
 
     return deferred.promise;
+  },
+  fetchProjectData: function(cb){
+    Request({
+      url: Config.apiEndpoints.projects,
+      method: "GET",
+      json: true
+    }, cb);
   }
 };
 

@@ -34,8 +34,6 @@ var routes = (
 if(typeof window !== "undefined"){
   window.onload = function(){
     ReactRouter.run(routes, ReactRouter.HistoryLocation, function(Handler, state){
-      // TODO: Let server pass in data to client
-      // instead of having client fetch data onload
       var data = JSON.parse(document.getElementById("data").innerHTML);
 
       React.render(<Handler data={data} />, document.getElementById("app-container"));

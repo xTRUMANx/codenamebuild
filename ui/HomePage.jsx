@@ -4,13 +4,25 @@ var React = require("react"),
   ProjectCard = require("./ProjectCard"),
   Store = require("./Store"),
   MasonryMixin = require('react-masonry-mixin'),
-  ProgressBar = require("./ProgressBar");
+  ProgressBar = require("./ProgressBar"),
+  Q = require("q");
 
 var HomePage = React.createClass({
   mixins: [MasonryMixin('masonryContainer', {})],
   statics: {
     fetchData: function(){
-      return Store.getProjects();
+      var deferred = Q.defer();
+
+      Store.fetchProjectData(function(err, res, body){
+        if(err || !body){
+          deferred.reject(err);
+        }
+        else{
+          deferred.resolve(body.projects);
+        }
+      });
+
+      return deferred.promise;
     }
   },
   componentWillMount: function(){
