@@ -1,4 +1,5 @@
 var Express = require("express"),
+  cookieParser = require("cookie-parser"),
   session = require("express-session"),
   BodyParser = require("body-parser"),
   Path = require("path"),
@@ -19,6 +20,8 @@ app.use(Express.static(Path.join(__dirname, "public")));
 app.use(BodyParser.json());
 
 app.use(Morgan("dev"));
+
+app.use(cookieParser());
 
 app.use(session({
   secret: "mysupersecretsessionsecret",
@@ -41,7 +44,9 @@ app.use(function(req, res){
 
   ReactRouter.run(UI.routes, req.url, function(Handler, state){
     Q.spawn(function *(){
-      var results = yield UI.fetchData(state.routes, req.params, req.query);
+      var cookie =  "connect.sid= " + req.cookies["connect.sid"];
+
+      var results = yield UI.fetchData(state.routes, req.params, req.query, cookie);
 
       var data = results.reduce(function(prev, curr, i, arr){
         if(curr){

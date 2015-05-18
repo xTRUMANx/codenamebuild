@@ -14,7 +14,23 @@ var React = require("react"),
   Store = require("./Store");
 
 var App = React.createClass({
-  componentWillMount: function(){
+  statics: {
+    fetchData: function(params, query, cookie){
+      var deferred = Q.defer();
+
+      Store.fetchUser(cookie, function(err, res, body){
+        if(err || !body){
+          deferred.reject(err);
+        }
+        else{
+          deferred.resolve(body.user);
+        }
+      });
+
+      return deferred.promise;
+    }
+  },
+  componentDidMount: function(){
     Store.subscribe(this.resetState);
   },
   componentWillUnmount: function(){
@@ -25,7 +41,7 @@ var App = React.createClass({
   },
   getInitialState: function(){
     if(!this.props.data.root){
-      // TODO: Api call to whoami to set username
+      Store.getUser();
 
       return Store.setAndGetInitialState();
     }

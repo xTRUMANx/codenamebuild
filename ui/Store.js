@@ -21,7 +21,13 @@ var Store = {
     this.subscriptions.splice(index, 1);
   },
   setAndGetInitialState: function(state){
-    this.state = state || this.state || {};
+    this.state = this.state || {};
+
+    if(state){
+      Object.keys(state).map(function(key){
+        this.state[key] = state[key];
+      }.bind(this));
+    }
 
     return this.state;
   },
@@ -127,8 +133,8 @@ var Store = {
       json: true,
       body: {username: username, password: password}
     }, function(err, res, body){
-      if(err){
-        deferred.reject(err);
+      if(err && !body){
+        deferred.reject(err || "body was falsy");
       }
       else{
         deferred.resolve(body.err);
@@ -163,6 +169,41 @@ var Store = {
     }.bind(this));
 
     return deferred.promise;
+  },
+  getUser: function(){
+    var deferred = Q.defer();
+
+    this.loadingUser = true;
+    this.emit();
+
+    this.fetchUser(function(err, res, body){
+      this.loadingUser = false;
+
+      if(err || !body){
+        deferred.reject(err);
+      }
+      else{
+        this.state = this.state || {};
+
+        this.state.user = body.user;
+
+        deferred.resolve(this.state);
+      }
+
+      this.emit();
+    }.bind(this));
+
+    return deferred.promise;
+  },
+  fetchUser: function(cookie, cb){
+    Request({
+      url: Config.apiEndpoints.whoami,
+      method: "GET",
+      json: true,
+      headers: {
+        Cookie: cookie
+      }
+    }, cb);
   }
 };
 

@@ -25,7 +25,7 @@ var HomePage = React.createClass({
       return deferred.promise;
     }
   },
-  componentWillMount: function(){
+  componentDidMount: function(){
     Store.subscribe(this.resetState);
   },
   componentWillUnmount: function(){

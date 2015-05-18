@@ -13,7 +13,7 @@ var parseApiClient = new ParseApi({
 router.use("/projects", projectsRoutes);
 
 router.get("/whoami", function(req, res){
-  res.json(req.session.user);
+  res.json({user: req.session.user || {}});
 });
 
 router.get("/logout", function(req, res){
@@ -37,8 +37,6 @@ router.post("/login", function(req, res){
     json: true,
     qs: req.body
   }, function(err, response, body){
-    console.log("err", err)
-    console.log("body", body)
     if(err){
       res.status(500).end();
     }
