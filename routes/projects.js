@@ -1,34 +1,32 @@
 var Express = require("express"),
   router = Express.Router(),
-  ParseApi = require("node-parse-api").Parse,
-  Config = require("../Config");
-
-var parseApiClient = new ParseApi({
-  app_id: Config.Parse.AppId,
-  api_key: Config.Parse.ApiKey
-});
+  Config = require("../config"),
+  Db = require("../db");
 
 router.get("/", function(req, res){
-  parseApiClient.findMany("Project", "", function(err, response){
-    if(err){
-      res.status(500).end();
-    }
-    else{
-      var projects = response.results.map(function(result){
-        var project = result;
-        project.id = result.objectId;
-        return project;
-      });
+  Db.
+    getProjects().
+    then(function(projects){
+      res.json({projects: projects});
+    }).
+    fail(function(err){
+      console.log(err);
 
-      res.json({projects: response.results});
-    }
-  });
+      res.status(500).end();
+    });
 });
 
 router.post("/", function(req, res){
-  parseApiClient.insert("Project", req.body, function(err, response){
-    res.json({id: response.objectId});
-  });
+  Db.
+    saveProject(req.body).
+    then(function(id){
+      res.json({id: id});
+    }).
+    fail(function(err){
+      console.log(err);
+
+      res.status(500).end();
+    });
 });
 
 module.exports = router;

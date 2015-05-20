@@ -1,14 +1,10 @@
 var Express = require("express"),
   router = Express.Router(),
   projectsRoutes = require("./projects"),
-  ParseApi = require("node-parse-api").Parse,
-  Config = require("../Config"),
-  Request = require("request");
-
-var parseApiClient = new ParseApi({
-  app_id: Config.Parse.AppId,
-  api_key: Config.Parse.ApiKey
-});
+  Config = require("../config"),
+  Db = require("../db"),
+  Crypto = require("crypto"),
+  Q = require("q");
 
 router.use("/projects", projectsRoutes);
 
@@ -23,66 +19,61 @@ router.get("/logout", function(req, res){
 });
 
 router.post("/login", function(req, res){
-  // NOTE: Not using parseApiClient for this
-  // operation since it can't tell you the reason
-  // for a failed sign up (such as username in use).
+  Q.spawn(function *(){
+    var credentials = req.body;
 
-  Request({
-    method: "GET",
-    url: "https://api.parse.com/1/login",
-    headers: {
-      "X-Parse-Application-Id": Config.Parse.AppId,
-      "X-Parse-REST-API-Key": Config.Parse.ApiKey
-    },
-    json: true,
-    qs: req.body
-  }, function(err, response, body){
-    if(err){
-      res.status(500).end();
-    }
-    else{
-      if(body.sessionToken){
-        req.session.user = {
-          parseToken: body.sessionToken,
-          objectId: body.objectId,
-          username: req.body.username
-        };
-      }
+    var hashedPassword = yield hashPassword(credentials.password, credentials.username);
 
-      res.json({err: body.error});
-    }
+    credentials.password = hashedPassword.toString("hex");
+
+    Db.
+      authenticate(credentials).
+      then(function(user){
+        if(user){
+          req.session.user = {
+            username: req.body.username
+          };
+        }
+
+        res.json({err: !user ? "Invalid login." : null});
+      }).
+      fail(function(err){
+        console.log(err);
+
+        res.status(500).end();
+      });
   });
 });
 
 router.post("/signUp", function(req, res){
-  // NOTE: Not using parseApiClient for this
-  // operation since it can't tell you the reason
-  // for a failed sign up (such as username in use).
-  Request({
-    method: "POST",
-    url: "https://api.parse.com/1/users",
-    headers: {
-      "X-Parse-Application-Id": Config.Parse.AppId,
-      "X-Parse-REST-API-Key": Config.Parse.ApiKey
-    },
-    json: true,
-    body: req.body
-  }, function(err, response, body){
-    if(err){
-      res.status(500).end();
-    }
-    else{
-      if(body.sessionToken){
+  Q.spawn(function *(){
+    var credentials = req.body;
+
+    var hashedPassword = yield hashPassword(credentials.password, credentials.username);
+
+    credentials.password = hashedPassword.toString("hex");
+
+    Db.
+      register(credentials).
+      then(function(){
         req.session.user = {
-          parseToken: body.sessionToken,
-          objectId: body.objectId,
           username: req.body.username
         };
-      }
 
-      res.json({err: body.error});
-    }
+        res.json({err: null});
+      }).
+      fail(function(err){
+        console.log(err);
+
+        res.status(500).end();
+      });
   });
 });
+
+function hashPassword(password, salt){
+  var pbkdf2 = Q.denodeify(Crypto.pbkdf2);
+
+  return pbkdf2(password, salt, Config.HashIterations, Config.HashKeyLength);
+}
 
 module.exports = router;
