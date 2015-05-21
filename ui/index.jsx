@@ -74,14 +74,12 @@ var App = React.createClass({
         <nav className="navbar navbar-default">
           <div className="container-fluid">
             <div className="navbar-header">
-              <a className="navbar-brand" href="/">Codename: Build</a>
+              <Link className="navbar-brand" to="root">Codename: Build</Link>
             </div>
             {this.state.username ? authenticatedLinks : unauthenticatedLinks}
           </div>
         </nav>
         <div className="container">
-          <h1 className="text-center">Codename: Build</h1>
-          <p className="lead text-center">Share your idea and bring your vision to life</p>
           <RouteHandler {...this.props} />
           <script id="data" type="text" dangerouslySetInnerHTML={{__html: JSON.stringify(this.props.data)}} />
         </div>
@@ -94,7 +92,7 @@ var routes = (
   <Route name="root" path="/" handler={App}>
     <DefaultRoute name="home" handler={HomePage} />
     <Route name="projects">
-      <DefaultRoute handler={ProjectPage} />
+      <DefaultRoute name="projectPage" handler={ProjectPage} />
       <Route name="createProject" handler={CreateProjectPage} />
     </Route>
     <Route name="logout" handler={LogoutPage} />

@@ -30,8 +30,19 @@ function executeQuery(sql, sqlArgs, cb){
 }
 
 var Db = {
+  getProject: function(id){
+    var sql = 'select id, name, description, createdby as "createdBy", createdon as "createdOn" from projects where id = $1;';
+
+    var sqlArgs = [id];
+
+    return executeQuery(sql, sqlArgs, function(results, done, deferred){
+      deferred.resolve(results.rows[0]);
+
+      done();
+    });
+  },
   getProjects: function(){
-    var sql = "select id, name, description from projects;";
+    var sql = 'select id, name, description, createdby as "createdBy", createdon as "createdOn" from projects;';
 
     return executeQuery(sql, function(results, done, deferred){
       deferred.resolve(results.rows);
@@ -40,9 +51,9 @@ var Db = {
     });
   },
   saveProject: function(project){
-    var sql = "insert into projects(name, description) values($1, $2) returning id;";
+    var sql = "insert into projects(name, description, createdby, createdon) values($1, $2, $3, now()) returning id;";
 
-    var sqlArgs = [project.name, project.description];
+    var sqlArgs = [project.name, project.description, project.createdBy];
 
     return executeQuery(sql, sqlArgs, function(results, done, deferred){
       deferred.resolve(results.rows[0].id);

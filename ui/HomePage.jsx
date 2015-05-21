@@ -13,7 +13,7 @@ var HomePage = React.createClass({
     fetchData: function(){
       var deferred = Q.defer();
 
-      Store.fetchProjectData(function(err, res, body){
+      Store.fetchProjects(function(err, res, body){
         if(err || !body){
           deferred.reject(err);
         }
@@ -60,6 +60,8 @@ var HomePage = React.createClass({
 
     return (
       <div>
+        <h1 className="text-center">Codename: Build</h1>
+        <p className="lead text-center">Share your idea and bring your vision to life</p>
         <h2>TODO</h2>
         <ul>
           <li>Submit a project</li>

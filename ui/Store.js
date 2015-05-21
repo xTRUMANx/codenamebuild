@@ -79,7 +79,7 @@ var Store = {
     this.loadingProjects = true;
     this.emit();
 
-    this.fetchProjectData(function(err, res, body){
+    this.fetchProjects(function(err, res, body){
       this.loadingProjects = false;
 
       if(err || !body){
@@ -98,7 +98,7 @@ var Store = {
 
     return deferred.promise;
   },
-  fetchProjectData: function(cb){
+  fetchProjects: function(cb){
     Request({
       url: Config.apiEndpoints.projects,
       method: "GET",
@@ -204,6 +204,39 @@ var Store = {
         Cookie: cookie
       }
     }, cb);
+  },
+  fetchProject: function(id, cb){
+    Request({
+      url: Config.apiEndpoints.projects,
+      method: "GET",
+      json: true,
+      qs: {id: id}
+    }, cb);
+  },
+  getProject: function(id){
+    this.state = this.state || {};
+
+    var deferred = Q.defer();
+
+    this.state.loadingProject = true;
+    this.emit();
+
+    this.fetchProject(id, function(err, res, body){
+      this.state.loadingProject = false;
+
+      if(err || !body){
+        deferred.reject(err);
+      }
+      else{
+        this.state.project = body.project;
+
+        deferred.resolve(this.state);
+      }
+
+      this.emit();
+    }.bind(this));
+
+    return deferred.promise;
   }
 };
 
